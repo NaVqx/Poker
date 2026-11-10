@@ -1,1 +1,133 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بازی حدس کارت</title>
+<style>
+  body {
+    font-family: sans-serif;
+    background: #1a1a2e;
+    color: #eee;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+  }
+  h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+  .score { font-size: 1.2rem; margin-bottom: 1rem; color: #f0c040; }
+  .card {
+    width: 120px;
+    height: 170px;
+    background: #fff;
+    color: #222;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    font-weight: bold;
+    margin: 1rem 0;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+  .card.red { color: #c0392b; }
+  .buttons { display: flex; gap: 12px; margin-top: 1rem; }
+  button {
+    padding: 12px 24px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: opacity 0.2s;
+  }
+  button:hover { opacity: 0.85; }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .higher { background: #27ae60; color: #fff; }
+  .lower { background: #c0392b; color: #fff; }
+  .restart { background: #555; color: #fff; margin-top: 1rem; }
+  .message { margin-top: 1rem; font-size: 1.1rem; min-height: 1.5em; }
+</style>
+</head>
+<body>
 
+<h1>بازی حدس کارت</h1>
+<div class="score">امتیاز: <span id="score">0</span></div>
+
+<div class="card" id="card">?</div>
+<div class="message" id="message">روی «بالاتر» یا «پایین‌تر» بزنید</div>
+
+<div class="buttons">
+  <button class="higher" id="btnHigher">بالاتر ⬆️</button>
+  <button class="lower" id="btnLower">پایین‌تر ⬇️</button>
+</div>
+<button class="restart" id="btnRestart">شروع دوباره</button>
+
+<script>
+  const suits = ['♠', '♥', '♦', '♣'];
+  let currentValue = null;
+  let score = 0;
+
+  const cardEl = document.getElementById('card');
+  const scoreEl = document.getElementById('score');
+  const msgEl = document.getElementById('message');
+  const btnHigher = document.getElementById('btnHigher');
+  const btnLower = document.getElementById('btnLower');
+  const btnRestart = document.getElementById('btnRestart');
+
+  function randomCard() {
+    const value = Math.floor(Math.random() * 13) + 1; // 1 تا 13
+    const suit = suits[Math.floor(Math.random() * 4)];
+    return { value, suit };
+  }
+
+  function displayCard(card) {
+    cardEl.textContent = card.suit + ' ' + card.value;
+    cardEl.classList.toggle('red', card.suit === '♥' || card.suit === '♦');
+  }
+
+  function startGame() {
+    currentValue = Math.floor(Math.random() * 13) + 1;
+    displayCard({ value: currentValue, suit: suits[Math.floor(Math.random() * 4)] });
+    msgEl.textContent = 'حدس بزنید کارت بعدی بالاتر است یا پایین‌تر؟';
+    btnHigher.disabled = false;
+    btnLower.disabled = false;
+  }
+
+  function guess(isHigher) {
+    const nextCard = randomCard();
+    displayCard(nextCard);
+
+    const correct = isHigher ? nextCard.value > currentValue : nextCard.value < currentValue;
+    const equal = nextCard.value === currentValue;
+
+    if (equal) {
+      msgEl.textContent = 'مساوی شد! دوباره تلاش کنید.';
+    } else if (correct) {
+      score++;
+      scoreEl.textContent = score;
+      msgEl.textContent = 'درست بود! ✅';
+    } else {
+      score = 0;
+      scoreEl.textContent = score;
+      msgEl.textContent = 'اشتباه بود! ❌ امتیاز صفر شد.';
+    }
+
+    currentValue = nextCard.value;
+  }
+
+  btnHigher.addEventListener('click', () => guess(true));
+  btnLower.addEventListener('click', () => guess(false));
+  btnRestart.addEventListener('click', () => {
+    score = 0;
+    scoreEl.textContent = 0;
+    startGame();
+  });
+
+  startGame();
+</script>
+
+</body>
+  </html>
